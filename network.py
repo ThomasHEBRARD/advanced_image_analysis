@@ -237,7 +237,6 @@ class UNet(nn.Module):
 
     def forward(self, x):
         encoder_outs = []
-        print('Going down')
         # encoder pathway, save outputs for merging
         for i, module in enumerate(self.down_convs):
             x, before_pool = module(x)
