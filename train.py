@@ -1,3 +1,4 @@
+from cProfile import run
 from get_datas import get_datas
 from network import UNet
 from PIL import Image
@@ -20,6 +21,7 @@ criterion = nn.CrossEntropyLoss()
 network = UNet(10)
 optimizer = torch.optim.SGD(network.parameters(), lr=0.01)
 network.train()
+running_loss = []
 
 for p in range(0, 10):
     print("Round {}".format(p))
@@ -33,6 +35,8 @@ for p in range(0, 10):
     loss = criterion(result_soft, label_x.long())
     loss.backward()
     optimizer.step()
+    running_loss += [loss.item()]
+    print(running_loss)
 
     image_result2 = result_soft[1]
     image_result2.shape
@@ -46,4 +50,4 @@ for p in range(0, 10):
     one_label_result = np.array(one_label_result).astype(np.uint8)
     im = Image.fromarray(one_label_result)
     im.save("results/result_{}.png".format(p))
-torch.save(network, "results")
+torch.save(network, "")
