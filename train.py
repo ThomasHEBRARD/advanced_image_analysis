@@ -25,33 +25,34 @@ from torch.autograd import Variable
 from torch.nn import Linear, ReLU, CrossEntropyLoss, Sequential, Conv2d, MaxPool2d, Module, Softmax, BatchNorm2d, Dropout, ConvTranspose2d
 from torch.optim import Adam, SGD
 
-import torch
+from torch import optim
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.autograd import Variable
-from collections import OrderedDict
-from torch.nn import init
+
 
 
 train_x, label_x = get_datas(10)
 #train_x1 = train_x_all[0:15]
 #label_x1 = label_x_all[0:15]
 m = nn.Softmax(dim=1)
-loss = nn.CrossEntropyLoss()
+criterion = nn.CrossEntropyLoss()
 
 network = UNet(10)
+optimizer = optim.Adam(network.parameters(), lr=0.1)
 
 for p in range(0,10):
     print('Round {}'.format(p))
     #indices = torch.randperm(len(train_x1))[:10]
     #train_x = train_x1[indices]
     #label_x = label_x1[indices]
-
+    optimizer.zero_grad()
     result = network(train_x)
     result_soft =m(result)
 
-    output = loss(result_soft, label_x.long())
-    output.backward()
+    loss = criterion(result_soft, label_x.long())
+    loss.backward()
+    optimizer.step()
 
     image_result2 = result_soft[1]
     image_result2.shape
