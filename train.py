@@ -41,7 +41,8 @@ loss = nn.CrossEntropyLoss()
 
 network = UNet(10)
 
-for i in range(0,10):
+for j in range(0,10):
+    print('Round {}'.format(j))
     indices = torch.randperm(len(train_x1))[:10]
     train_x = train_x1[indices]
     label_x = label_x1[indices]
@@ -58,10 +59,10 @@ for i in range(0,10):
     for i in range(0,512):
         for j in range(0,512):
             if image_result2[0,i,j]>image_result2[1,i,j]:
-                one_label_result[i,j] = 0
-            if image_result2[0,i,j]<=image_result2[1,i,j]:
                 one_label_result[i,j] = 255
+            if image_result2[0,i,j]<=image_result2[1,i,j]:
+                one_label_result[i,j] = 0
     one_label_result =np.array(one_label_result).astype(np.uint8)
     im = Image.fromarray(one_label_result)
-    im.save("results/result_{}.jpeg".format(i))
+    im.save("results/result_{}.jpeg".format(j))
 torch.save(network, "results")

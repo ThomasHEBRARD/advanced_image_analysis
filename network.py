@@ -241,17 +241,10 @@ class UNet(nn.Module):
         # encoder pathway, save outputs for merging
         for i, module in enumerate(self.down_convs):
             x, before_pool = module(x)
-            print('After maxpool')
-            print(x.shape)
-            print('Stored array')
-            print(before_pool.shape)
             encoder_outs.append(before_pool)
-        print('Going up')
         for i, module in enumerate(self.up_convs):
             before_pool = encoder_outs[-(i+2)]
-            print('After going up')
             x = module(before_pool, x)
-            print(x.shape)
         
         # No softmax is used. This means you need to use
         # nn.CrossEntropyLoss is your training script,
