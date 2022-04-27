@@ -33,9 +33,9 @@ from collections import OrderedDict
 from torch.nn import init
 
 
-train_x_all, label_x_all = get_datas(30)
-train_x1 = train_x_all[0:15]
-label_x1 = label_x_all[0:15]
+train_x, label_x = get_datas(10)
+#train_x1 = train_x_all[0:15]
+#label_x1 = label_x_all[0:15]
 m = nn.Softmax(dim=1)
 loss = nn.CrossEntropyLoss()
 
@@ -43,9 +43,9 @@ network = UNet(10)
 
 for p in range(0,10):
     print('Round {}'.format(p))
-    indices = torch.randperm(len(train_x1))[:10]
-    train_x = train_x1[indices]
-    label_x = label_x1[indices]
+    #indices = torch.randperm(len(train_x1))[:10]
+    #train_x = train_x1[indices]
+    #label_x = label_x1[indices]
 
     result = network(train_x)
     result_soft =m(result)
@@ -64,5 +64,5 @@ for p in range(0,10):
                 one_label_result[i,j] = 0
     one_label_result =np.array(one_label_result).astype(np.uint8)
     im = Image.fromarray(one_label_result)
-    im.save("results/result_{}.jpeg".format(p))
+    im.save("results/result_{}.png".format(p))
 torch.save(network, "results")
