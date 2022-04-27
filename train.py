@@ -18,7 +18,8 @@ m = nn.Softmax(dim=1)
 criterion = nn.CrossEntropyLoss()
 
 network = UNet(10)
-optimizer = optim.Adam(network.parameters(), lr=0.1)
+optimizer = torch.optim.SGD(network.parameters(), lr=0.01)
+network.train()
 
 for p in range(0, 10):
     print("Round {}".format(p))
