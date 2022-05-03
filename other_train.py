@@ -56,7 +56,7 @@ model = UNet()
 TRAINING = True
 
 # Set num of epochs
-EPOCHS = 40
+EPOCHS = 70
 
 # Set device: `cuda` or `cpu`
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -113,7 +113,7 @@ if TRAINING:
     best_iou_score = 0.0
     train_logs_list, valid_logs_list = [], []
 
-    for i in range(20, EPOCHS):
+    for i in range(42, EPOCHS):
 
         # Perform training & validation
         print("\nEpoch: {}".format(i))

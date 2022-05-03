@@ -6,12 +6,14 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 import warnings
+
 warnings.filterwarnings("ignore")
 
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
 import albumentations as album
+
 
 class DoubleConv(nn.Module):
     def __init__(self, in_channels, out_channels):
@@ -27,8 +29,8 @@ class DoubleConv(nn.Module):
 
     def forward(self, x):
         return self.double_conv(x)
-    
-    
+
+
 class DownBlock(nn.Module):
     def __init__(self, in_channels, out_channels):
         super(DownBlock, self).__init__()
@@ -40,16 +42,25 @@ class DownBlock(nn.Module):
         down_out = self.down_sample(skip_out)
         return (down_out, skip_out)
 
-    
+
 class UpBlock(nn.Module):
     def __init__(self, in_channels, out_channels, up_sample_mode):
         super(UpBlock, self).__init__()
-        if up_sample_mode == 'conv_transpose':
-            self.up_sample = nn.ConvTranspose2d(in_channels-out_channels, in_channels-out_channels, kernel_size=2, stride=2)        
-        elif up_sample_mode == 'bilinear':
-            self.up_sample = nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True)
+        if up_sample_mode == "conv_transpose":
+            self.up_sample = nn.ConvTranspose2d(
+                in_channels - out_channels,
+                in_channels - out_channels,
+                kernel_size=2,
+                stride=2,
+            )
+        elif up_sample_mode == "bilinear":
+            self.up_sample = nn.Upsample(
+                scale_factor=2, mode="bilinear", align_corners=True
+            )
         else:
-            raise ValueError("Unsupported `up_sample_mode` (can take one of `conv_transpose` or `bilinear`)")
+            raise ValueError(
+                "Unsupported `up_sample_mode` (can take one of `conv_transpose` or `bilinear`)"
+            )
         self.double_conv = DoubleConv(in_channels, out_channels)
 
     def forward(self, down_input, skip_input):
@@ -57,9 +68,9 @@ class UpBlock(nn.Module):
         x = torch.cat([x, skip_input], dim=1)
         return self.double_conv(x)
 
-    
+
 class UNet(nn.Module):
-    def __init__(self, out_classes=2, up_sample_mode='conv_transpose'):
+    def __init__(self, out_classes=2, up_sample_mode="conv_transpose"):
         super(UNet, self).__init__()
         self.up_sample_mode = up_sample_mode
         # Downsampling Path
@@ -91,7 +102,7 @@ class UNet(nn.Module):
         x = self.conv_last(x)
         x = self.soft_max(x)
         return x
-    
+
 
 # Get UNet model
 model = UNet()
