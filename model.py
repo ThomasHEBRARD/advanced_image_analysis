@@ -14,7 +14,9 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 import albumentations as album
 
+#We define here a classical architecture for our U-Net network working with pytorch convolutional layers
 
+#One downblock
 class DoubleConv(nn.Module):
     def __init__(self, in_channels, out_channels):
         super(DoubleConv, self).__init__()
@@ -31,6 +33,7 @@ class DoubleConv(nn.Module):
         return self.double_conv(x)
 
 
+#Adding a maxpool to get all the block
 class DownBlock(nn.Module):
     def __init__(self, in_channels, out_channels):
         super(DownBlock, self).__init__()
@@ -42,7 +45,7 @@ class DownBlock(nn.Module):
         down_out = self.down_sample(skip_out)
         return (down_out, skip_out)
 
-
+#The upblock with the two modes (we will use only the transpose function during trainings)
 class UpBlock(nn.Module):
     def __init__(self, in_channels, out_channels, up_sample_mode):
         super(UpBlock, self).__init__()
@@ -68,7 +71,7 @@ class UpBlock(nn.Module):
         x = torch.cat([x, skip_input], dim=1)
         return self.double_conv(x)
 
-
+#The U-ent network starting with 64 layers
 class UNet(nn.Module):
     def __init__(self, out_classes=2, up_sample_mode="conv_transpose"):
         super(UNet, self).__init__()

@@ -1,53 +1,137 @@
-from cProfile import run
-from get_datas import get_datas
-from network import UNet
-from PIL import Image
+import os, cv2
 
-# importing the libraries
-import numpy as np
-
-# PyTorch libraries and modules
+os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 import torch
-from torch import optim
 import torch.nn as nn
+from torch.utils.data import DataLoader
+from model import UNet
+from get_datas_and_visu import (
+    CreateDataset,
+    get_preprocessing,
+    get_training_augmentation,
+    get_validation_augmentation,
+)
+import numpy as np
+import pickle
+
+import segmentation_models_pytorch as smp
 
 
-train_x, label_x = get_datas(10)
-# train_x1 = train_x_all[0:15]
-# label_x1 = label_x_all[0:15]
-m = nn.Softmax(dim=1)
-criterion = nn.CrossEntropyLoss()
+class_rgb_values = [[0, 0, 0], [255, 255, 255]]
+select_class_rgb_values = np.array(class_rgb_values)
 
-network = UNet(10)
-optimizer = torch.optim.SGD(network.parameters(), lr=0.01)
-network.train()
-running_loss = []
+x_train_dir = "datas/train_images"
+y_train_dir = "datas/train_labels"
 
-for p in range(0, 10):
-    print("Round {}".format(p))
-    # indices = torch.randperm(len(train_x1))[:10]
-    # train_x = train_x1[indices]
-    # label_x = label_x1[indices]
-    optimizer.zero_grad()
-    result = network(train_x)
-    result_soft = m(result)
+x_valid_dir = "datas/val_images"
+y_valid_dir = "datas/val_labels"
 
-    loss = criterion(result_soft, label_x.long())
-    loss.backward()
-    optimizer.step()
-    running_loss += [loss.item()]
-    print(running_loss)
+#We define our datasets
 
-    image_result2 = result_soft[1]
-    image_result2.shape
-    one_label_result = torch.empty((512, 512), dtype=torch.int64)
-    for i in range(0, 512):
-        for j in range(0, 512):
-            if image_result2[0, i, j] > image_result2[1, i, j]:
-                one_label_result[i, j] = 255
-            if image_result2[0, i, j] <= image_result2[1, i, j]:
-                one_label_result[i, j] = 0
-    one_label_result = np.array(one_label_result).astype(np.uint8)
-    im = Image.fromarray(one_label_result)
-    im.save("results/result_{}.png".format(p))
-torch.save(network, "")
+valid_dataset = CreateDataset(
+    x_valid_dir,
+    y_valid_dir,
+    augmentation=get_validation_augmentation(),
+    preprocessing=get_preprocessing(preprocessing_fn=None),
+    class_rgb_values=select_class_rgb_values,
+)
+
+train_dataset = CreateDataset(
+    x_train_dir,
+    y_train_dir,
+    augmentation=get_training_augmentation(),
+    preprocessing=get_preprocessing(preprocessing_fn=None),
+    class_rgb_values=select_class_rgb_values,
+)
+
+# Get train and val data loaders
+train_loader = DataLoader(train_dataset, batch_size=7, shuffle=True)
+valid_loader = DataLoader(valid_dataset, batch_size=1, shuffle=False)
+
+
+model = UNet()
+
+TRAINING = True
+
+# Num of epochs
+EPOCHS = 70
+
+# Device
+DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+# Loss functions
+# Here we used two of them
+
+loss = smp.utils.losses.CrossEntropyLoss()
+#loss = smp.utils.losses.DiceLoss()
+
+# define metrics, we use one metrics so we can compare the two training sessions
+metrics = [
+    smp.utils.metrics.IoU(threshold=0.5),
+]
+
+# We only test one optimizer
+optimizer = torch.optim.Adam(
+    [
+        dict(params=model.parameters(), lr=0.00008),
+    ]
+)
+
+# Our moving learning rate
+lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(
+    optimizer,
+    T_0=1,
+    T_mult=2,
+    eta_min=5e-5,
+)
+
+# We can load a previous model
+if os.path.exists("./models/cross_model.pth"):
+    model = torch.load(
+        "cross_model.pth",
+        map_location=DEVICE,
+    )
+
+# Then we define our 'epochs' class with the segmentation library
+train_epoch = smp.utils.train.TrainEpoch(
+    model,
+    loss=loss,
+    metrics=metrics,
+    optimizer=optimizer,
+    device=DEVICE,
+    verbose=True,
+)
+
+valid_epoch = smp.utils.train.ValidEpoch(
+    model,
+    loss=loss,
+    metrics=metrics,
+    device=DEVICE,
+    verbose=True,
+)
+
+if TRAINING:
+
+    best_iou_score = 0.0
+    train_logs_list, valid_logs_list = [], []
+
+    for i in range(42, EPOCHS):
+
+        # Perform training & validation
+        print("\nEpoch: {}".format(i))
+        train_logs = train_epoch.run(train_loader)
+        valid_logs = valid_epoch.run(valid_loader)
+        train_logs_list.append(train_logs)
+        valid_logs_list.append(valid_logs)
+        
+        #We store the list of our resulsts for the training
+        with open(f"./training_list_cross/train/train_logs_list_{i}.pkl", "wb") as f:
+            pickle.dump(train_logs_list, f)
+        with open(f"./training_list_cross/valid/valid_logs_list_{i}.pkl", "wb") as f:
+            pickle.dump(valid_logs_list, f)
+
+        # Save model if a better val IoU score is obtained
+        if best_iou_score < valid_logs["iou_score"]:
+            best_iou_score = valid_logs["iou_score"]
+            torch.save(model, "./models/cross_model.pth")
+            print("Model saved!")
