@@ -61,7 +61,7 @@ for epoch, d in grouped_valid_dice:
         to_m = []
         for f in d:
             if f["iou_score"] != 0.3243663012981415:
-                to_m.append(7 * f["iou_score"])
+                to_m.append(5 * f["iou_score"])
         X_valid_dice.append(epoch)
         Y_valid_dice.append(statistics.mean(to_m))
 
@@ -85,7 +85,7 @@ for epoch, d in grouped_valid_cross:
 
 
 fig, (ax1) = plt.subplots(1)
-fig.suptitle("iou_score")
+fig.suptitle("iou_score by epoch")
 ax1.plot(X_train_dice, Y_train_dice, label="train_dice")
 ax1.plot(X_valid_dice, Y_valid_dice, label="valid_dice")
 ax1.plot(X_train_cross, Y_train_cross, label="train_cross")
