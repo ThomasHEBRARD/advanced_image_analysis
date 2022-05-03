@@ -14,8 +14,8 @@ if os.path.exists('./best_model.pth'):
 class_rgb_values = [[0, 0, 0], [255, 255, 255]]
 select_class_rgb_values =  np.array(class_rgb_values)
 
-x_train_dir = os.path.join(DATA_DIR, 'train_images')
-y_train_dir = os.path.join(DATA_DIR, 'train_labels')
+x_train_dir = 'datas/train_images'
+y_train_dir = 'datas/train_labels'
 
 sample_preds_folder = 'sample_predictions/'
 if not os.path.exists(sample_preds_folder):
@@ -63,10 +63,9 @@ for idx in range(len(train_dataset)):
     # Convert gt_mask from `CHW` format to `HWC` format
     gt_mask = np.transpose(gt_mask,(1,2,0))
     gt_mask = crop_image(colour_code_segmentation(reverse_one_hot(gt_mask), select_class_rgb_values))
-    cv2.imwrite(os.path.join(sample_preds_folder, f"sample_pred_{idx}.png"), np.hstack([image_vis, gt_mask, pred_mask])[:,:,::-1])
+    # cv2.imwrite(os.path.join(sample_preds_folder, f"sample_pred_{idx}.png"), np.hstack([image_vis, gt_mask, pred_mask])[:,:,::-1])
     
     visualize(
-        original_image = image_vis,
         ground_truth_mask = gt_mask,
         predicted_mask = pred_mask,
         predicted_building_heatmap = pred_building_heatmap

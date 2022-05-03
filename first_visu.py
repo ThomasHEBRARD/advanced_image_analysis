@@ -16,11 +16,11 @@ from torch.utils.data import DataLoader
 DATA_DIR_VAL = "D:/DTU-Courses/DTU-AdvanceImage/mini_project/advanced_image_analysis/EM_ISBI_Challenge/EM_ISBI_Challenge/"
 DATA_DIR = "D:/DTU-Courses/DTU-AdvanceImage/mini_project/advanced_image_analysis/datas/"
 
-x_train_dir = os.path.join(DATA_DIR, 'train_images')
-y_train_dir = os.path.join(DATA_DIR, 'train_labels')
+x_train_dir = 'datas/train_images'
+y_train_dir = 'datas/train_labels'
 
-x_valid_dir = os.path.join(DATA_DIR_VAL, 'train_images')
-y_valid_dir = os.path.join(DATA_DIR_VAL, 'train_labels')
+x_valid_dir = 'datas/val_images'
+y_valid_dir = 'datas/val_labels'
 
 # helper function for data visualization
 def visualize(**images):
@@ -200,11 +200,11 @@ select_class_rgb_values =  np.array(class_rgb_values)
 dataset = BuildingsDataset(x_train_dir, y_train_dir, class_rgb_values=select_class_rgb_values)
 random_idx = random.randint(0, len(dataset)-1)
 image, mask = dataset[2]
-visualize(
-    original_image = image,
-    ground_truth_mask = colour_code_segmentation(reverse_one_hot(mask), select_class_rgb_values),
-    one_hot_encoded_mask = reverse_one_hot(mask)
-)
+# visualize(
+#     original_image = image,
+#     ground_truth_mask = colour_code_segmentation(reverse_one_hot(mask), select_class_rgb_values),
+#     one_hot_encoded_mask = reverse_one_hot(mask)
+# )
 
 augmented_dataset = BuildingsDataset(
     x_train_dir, y_train_dir, 
