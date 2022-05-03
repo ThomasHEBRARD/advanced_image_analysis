@@ -1,0 +1,7 @@
+torch
+sklearn
+matplotlib
+pandas
+scikit-image
+tqdm
+segmentation_models_pytorch
