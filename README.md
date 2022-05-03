@@ -1,1 +1,1 @@
-coucou
+Image segmentation is used to find the structure of an image, and to label its different parts. Given a electron microscopy image, we trained a convolutional neural network to segment neuronal structures. You can find all our code on github :
