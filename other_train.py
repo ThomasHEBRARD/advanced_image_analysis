@@ -56,13 +56,13 @@ model = UNet()
 TRAINING = True
 
 # Set num of epochs
-EPOCHS = 70
+EPOCHS = 40
 
 # Set device: `cuda` or `cpu`
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # define loss function
-loss = smp.utils.losses.DiceLoss()
+loss = smp.utils.losses.CrossEntropyLoss()
 
 # define metrics
 metrics = [
@@ -113,7 +113,7 @@ if TRAINING:
     best_iou_score = 0.0
     train_logs_list, valid_logs_list = [], []
 
-    for i in range(0, EPOCHS):
+    for i in range(20, EPOCHS):
 
         # Perform training & validation
         print("\nEpoch: {}".format(i))
@@ -121,9 +121,9 @@ if TRAINING:
         valid_logs = valid_epoch.run(valid_loader)
         train_logs_list.append(train_logs)
         valid_logs_list.append(valid_logs)
-        with open(f"lists/train/train_logs_list_{i}.pkl", "wb") as f:
+        with open(f"lists2/train/train_logs_list_{i}.pkl", "wb") as f:
             pickle.dump(train_logs_list, f)
-        with open(f"lists/valid/valid_logs_list_{i}.pkl", "wb") as f:
+        with open(f"lists2/valid/valid_logs_list_{i}.pkl", "wb") as f:
             pickle.dump(valid_logs_list, f)
 
         # Save model if a better val IoU score is obtained

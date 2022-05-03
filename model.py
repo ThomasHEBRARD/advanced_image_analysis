@@ -67,6 +67,7 @@ class UNet(nn.Module):
         self.down_conv2 = DownBlock(64, 128)
         self.down_conv3 = DownBlock(128, 256)
         self.down_conv4 = DownBlock(256, 512)
+        self.soft_max = nn.Softmax()
         # Bottleneck
         self.double_conv = DoubleConv(512, 1024)
         # Upsampling Path
@@ -88,6 +89,7 @@ class UNet(nn.Module):
         x = self.up_conv2(x, skip2_out)
         x = self.up_conv1(x, skip1_out)
         x = self.conv_last(x)
+        x = self.soft_max(x)
         return x
     
 

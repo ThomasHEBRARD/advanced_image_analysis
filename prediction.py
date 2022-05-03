@@ -14,8 +14,8 @@ if os.path.exists('./best_model.pth'):
 class_rgb_values = [[0, 0, 0], [255, 255, 255]]
 select_class_rgb_values =  np.array(class_rgb_values)
 
-x_train_dir = 'datas/train_images'
-y_train_dir = 'datas/train_labels'
+x_train_dir = 'datas/val_images'
+y_train_dir = 'datas/val_labels'
 
 sample_preds_folder = 'sample_predictions/'
 if not os.path.exists(sample_preds_folder):
