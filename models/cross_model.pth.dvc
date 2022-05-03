@@ -1,0 +1,4 @@
+outs:
+- md5: 71fc29f7af6ff2ecf6877e538cafb10c
+  size: 147954417
+  path: cross_model.pth

@@ -1,0 +1,4 @@
+outs:
+- md5: 3239bef3814712b2ab7e9714739c3835
+  size: 147954609
+  path: dice_model.pth
